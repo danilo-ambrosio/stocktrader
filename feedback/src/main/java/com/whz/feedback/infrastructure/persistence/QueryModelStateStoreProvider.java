@@ -54,7 +54,7 @@ public class QueryModelStateStoreProvider {
 
     new EntryAdapterProvider(stage.world()); // future use
 
-    StateTypeStateStoreMap.stateTypeToStoreName(FeedbackData.class, Feedback.class.getSimpleName());
+    StateTypeStateStoreMap.stateTypeToStoreName(FeedbackData.class, FeedbackData.class.getSimpleName());
 
     final StateStore store =
         StoreActorBuilder.from(
