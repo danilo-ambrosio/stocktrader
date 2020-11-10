@@ -1,5 +1,7 @@
 package com.whz.feedback.infrastructure.persistence;
 
+import com.whz.feedback.infrastructure.FeedbackData;
+import com.whz.feedback.model.feedback.Feedback;
 import io.vlingo.actors.Stage;
 import io.vlingo.lattice.model.stateful.StatefulTypeRegistry;
 import io.vlingo.symbio.EntryAdapterProvider;
@@ -7,6 +9,7 @@ import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
 import io.vlingo.symbio.store.state.StateStore;
+import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.xoom.actors.Settings;
 import io.vlingo.xoom.annotation.persistence.Persistence.StorageType;
 import io.vlingo.xoom.storage.Model;
@@ -50,6 +53,8 @@ public class QueryModelStateStoreProvider {
     }
 
     new EntryAdapterProvider(stage.world()); // future use
+
+    StateTypeStateStoreMap.stateTypeToStoreName(FeedbackData.class, Feedback.class.getSimpleName());
 
     final StateStore store =
         StoreActorBuilder.from(
