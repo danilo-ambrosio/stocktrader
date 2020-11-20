@@ -1,27 +1,17 @@
 package com.whz.portfolio.infrastructure.persistence;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.whz.portfolio.infrastructure.EventTypes;
 import com.whz.portfolio.infrastructure.PortfolioData;
-
-import io.vlingo.lattice.model.DomainEvent;
-import io.vlingo.lattice.model.IdentifiedDomainEvent;
+import com.whz.portfolio.model.portfolio.PortfolioCreated;
 import io.vlingo.lattice.model.projection.Projectable;
 import io.vlingo.lattice.model.projection.StateStoreProjectionActor;
-import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Source;
 
 public class PortfolioProjectionActor extends StateStoreProjectionActor<PortfolioData> {
 	private static final PortfolioData Empty = PortfolioData.empty();
 
-	private String dataId;
-	private final List<IdentifiedDomainEvent> events;
-
 	public PortfolioProjectionActor() {
 		super(QueryModelStateStoreProvider.instance().store);
-		this.events = new ArrayList<>(2);
 	}
 
 	@Override
@@ -30,46 +20,26 @@ public class PortfolioProjectionActor extends StateStoreProjectionActor<Portfoli
 	}
 
 	@Override
-	protected String dataIdFor(final Projectable projectable) {
-		dataId = events.get(0).identity();
-		return dataId;
-	}
+	protected PortfolioData merge(final PortfolioData previousData,
+								  final int previousVersion,
+								  final PortfolioData currentData,
+								  final int currentVersion) {
+		PortfolioData merged = null;
 
-	@Override
-	protected PortfolioData merge(PortfolioData previousData, int previousVersion, PortfolioData currentData,
-			int currentVersion) {
-		System.out.println("noo");
-		return super.merge(previousData, previousVersion, currentData, currentVersion);
-	}
-
-	@Override
-	protected PortfolioData merge(final PortfolioData previousData, final int previousVersion,
-			final PortfolioData currentData, final int currentVersion, final List<Source<?>> sources) {
-
-		if (previousVersion == currentVersion) {
-			return currentData;
-		}
-
-		for (final DomainEvent event : events) {
+		for (final Source<?> event : sources()) {
 			switch (EventTypes.valueOf(event.typeName())) {
 			case PortfolioCreated:
-				System.out.println(event);
-				return PortfolioData.from(currentData.id, currentData.owner); // fixed and closed
+				final PortfolioCreated portfolioCreated = typed(event);
+				merged = PortfolioData.from(portfolioCreated.id, portfolioCreated.owner); // fixed and closed
+				break;
 			default:
+				merged = Empty;
 				logger().warn("Event of type " + event.typeName() + " was not matched.");
 				break;
 			}
 		}
 
-		return previousData;
+		return merged;
 	}
 
-	@Override
-	protected void prepareForMergeWith(final Projectable projectable) {
-		events.clear();
-
-		for (Entry<?> entry : projectable.entries()) {
-			events.add(entryAdapter().anyTypeFromEntry(entry));
-		}
-	}
 }

@@ -3,6 +3,7 @@ package com.whz.portfolio.infrastructure.persistence;
 import java.util.Arrays;
 import java.util.List;
 
+import com.whz.portfolio.model.portfolio.PortfolioCreated;
 import io.vlingo.actors.Definition;
 import io.vlingo.actors.Protocols;
 import io.vlingo.actors.Stage;
@@ -27,7 +28,7 @@ public class ProjectionDispatcherProvider {
 			return instance;
 
 		final List<ProjectToDescription> descriptions = Arrays
-				.asList(ProjectToDescription.with(PortfolioProjectionActor.class, "PortfolioCreated"));
+				.asList(ProjectToDescription.with(PortfolioProjectionActor.class, PortfolioCreated.class.getName()));
 
 		final Protocols dispatcherProtocols = stage.actorFor(
 				new Class<?>[] { Dispatcher.class, ProjectionDispatcher.class },
